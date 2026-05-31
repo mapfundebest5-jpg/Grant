@@ -1,0 +1,6 @@
+{
+  "name": "Facebook Pro",
+  "description": "Professional creator companion dashboard simulator for Facebook pages and profile diagnostics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
