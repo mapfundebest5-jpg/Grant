@@ -522,8 +522,7 @@ fun FacebookProMainDashboard(
                     page = currentPage,
                     verifiedPhone = verifiedPhone,
                     isVerified = isVerifiedPro,
-                    onEditClick = { showProfileEditDialog = true },
-                    viewModel = viewModel
+                    onEditClick = { showProfileEditDialog = true }
                 )
             }
         }
@@ -2069,25 +2068,14 @@ fun AiInsightsTabScreen(
     }
 }
 
-// --- TAB 3: PROFILE SETTINGS AND METASHIELD VERIFICATION PORTAL ---
+// --- TAB 3: PROFILE SETTINGS (NO LOGOUT PERMITTED) ---
 @Composable
 fun ProfileSettingsTabScreen(
     page: Page?,
     verifiedPhone: String,
     isVerified: Boolean,
-    onEditClick: () -> Unit,
-    viewModel: CreatorViewModel
+    onEditClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    
-    // Portal states
-    var isVerifyingNode by remember { mutableStateOf(false) }
-    var verificationStepText by remember { mutableStateOf("") }
-    
-    val isMetaVerified = page?.isMetaVerified ?: false
-    val currentMetaTier = page?.metaVerifiedTier ?: "None"
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2095,255 +2083,13 @@ fun ProfileSettingsTabScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        
-        // CARD 1: THE ELITE AI META VERIFIED HUB
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = if (isMetaVerified) 2.dp else 1.dp,
-                    brush = if (isMetaVerified) {
-                        Brush.linearGradient(listOf(Color(0xFF8A2387), Color(0xFFE94057), Color(0xFFF27121)))
-                    } else {
-                        Brush.linearGradient(listOf(Color.LightGray, Color.LightGray))
-                    },
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "AI Meta Verified Crest Portal",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 14.sp,
-                        color = if (isMetaVerified) Color(0xFFE94057) else Color.Black
-                    )
-                    
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                if (isMetaVerified) FacebookBlue.copy(alpha = 0.12f) else Color.LightGray.copy(alpha = 0.3f)
-                            )
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = if (isMetaVerified) "ACTIVE CERTIFICATE" else "UNVERIFIED SHIELD",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isMetaVerified) FacebookBlue else Color.Gray
-                        )
-                    }
-                }
-
-                if (isMetaVerified) {
-                    // SHOW RETINUE OF ELEVATED OFFICIATION
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(FacebookLightGray.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(FacebookBlue),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                            }
-                            Text(
-                                "Certified official: ${page?.name}",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        
-                        Divider(color = Color.LightGray.copy(alpha = 0.5f))
-                        
-                        Text(
-                            text = "Certificate Code: MS-ZW-${page?.id ?: 1}-${verifiedPhone.takeLast(4)}",
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = Color.DarkGray
-                        )
-                        
-                        Text(
-                            text = "Coverage Plan: $currentMetaTier tier. Standard 1.5x amplification is currently applied to all organic and campaign reach metrics across Zimbabwe target nodes.",
-                            fontSize = 11.sp,
-                            color = Color.Gray,
-                            lineHeight = 14.sp
-                        )
-                        
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        // Toggle custom tier values or options
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf("Pro AI", "Enterprise Shield").forEach { tier ->
-                                val active = currentMetaTier == tier
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(if (active) FacebookBlue else Color.White)
-                                        .border(1.dp, if (active) FacebookBlue else Color.LightGray, RoundedCornerShape(6.dp))
-                                        .clickable { viewModel.setMetaVerified(true, tier) }
-                                        .padding(vertical = 6.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = tier,
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (active) Color.White else Color.DarkGray
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.setMetaVerified(false, "None")
-                            Toast.makeText(context, "Verification package deactivated.", Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Unsubscribe Meta Verified", color = Color.Gray, fontSize = 11.sp)
-                    }
-                } else {
-                    // APPLY VIEW FOR AI META VERIFICATION
-                    Text(
-                        text = "Secure your profile and capture elevated reach parameters with AI Meta Verified. Instantly apply using your validated Zimbabwe location terminal and device key identifiers.",
-                        fontSize = 11.sp,
-                        color = Color.DarkGray,
-                        lineHeight = 15.sp
-                    )
-                    
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        listOf(
-                            "✓ Glowing Blue Verification Crest",
-                            "✓ 1.5x Premium Engagement & Campaign CTR multipliers",
-                            "✓ Exclusive regional node safety auditing",
-                            "✓ Real-time AI Caption optimizer boost"
-                        ).forEach { feature ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(feature, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-
-                    if (isVerifyingNode) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = FacebookBlue)
-                            Text(verificationStepText, fontSize = 10.sp, color = Color.DarkGray, fontFamily = FontFamily.Monospace)
-                        }
-                    } else {
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    isVerifyingNode = true
-                                    verificationStepText = "Initiating handshake with terminal +263..."
-                                    delay(1000)
-                                    verificationStepText = "Validating Creator Quality Score >= 90..."
-                                    delay(1000)
-                                    verificationStepText = "Encoding certificate hashes for security..."
-                                    delay(1200)
-                                    verificationStepText = "Provisioning AI Meta Verified Pro AI tier..."
-                                    delay(800)
-                                    viewModel.setMetaVerified(true, "Pro AI")
-                                    isVerifyingNode = false
-                                    Toast.makeText(context, "Welcome to AI Meta Verified!", Toast.LENGTH_LONG).show()
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = FacebookBlue),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text("Apply & Activate AI Meta Verification", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-
-        // CARD 2: DETAILED CUSTOMIZABLE ABOUT CARD
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("About Customizable Fields", fontWeight = FontWeight.Black, fontSize = 13.sp)
-                    TextButton(onClick = onEditClick) {
-                        Text("Customize Details", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = FacebookBlue)
-                    }
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    val fields = listOf(
-                        "Email Address" to (page?.aboutEmail ?: "contact@techinsider.pro"),
-                        "Creator Website" to (page?.aboutWebsite ?: "www.techinsider.pro"),
-                        "Primary Location" to (page?.aboutLocation ?: "Harare, Zimbabwe"),
-                        "Technical Role" to (page?.aboutWork ?: "Innovator & Platform Strategist"),
-                        "Creation Record" to (page?.aboutJoinedDate ?: "Joined May 2024")
-                    )
-
-                    fields.forEach { (label, value) ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(FacebookLightGray.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(label, fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-                                Text(value, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // CARD 3: CREATOR SECURITY LOCK & AUDITING NODE
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Creator Verification Security", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("Creator Verification Security", fontWeight = FontWeight.Bold, fontSize = 14.sp)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -2352,19 +2098,19 @@ fun ProfileSettingsTabScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
+                            .size(42.dp)
                             .clip(CircleShape)
                             .background(Color(0xFF4CAF50).copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF4CAF50))
                     }
 
                     Column {
-                        Text("Verified Endpoint: $verifiedPhone", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("Verified Endpoint: $verifiedPhone", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         Text(
                             text = if (isVerified) "✓ Approved Professional Anchor Node" else "Provision Pending",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = Color(0xFF4CAF50),
                             fontWeight = FontWeight.SemiBold
                         )
@@ -2373,19 +2119,18 @@ fun ProfileSettingsTabScreen(
             }
         }
 
-        // CARD 4: AD-HOC LOCK MECHANISM
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Account Lock Status", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("Account Lock Status", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Text(
                     text = "Professional network certification has anchored this terminal permanently to your Zimbabwe (+263) device. In compliance with physical authentication security protocol, log out functions are locked and permanently disabled on this channel configuration.",
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     color = Color.Gray,
-                    lineHeight = 14.sp
+                    lineHeight = 15.sp
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -2402,10 +2147,10 @@ fun ProfileSettingsTabScreen(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.DarkGray, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.DarkGray, modifier = Modifier.size(16.dp))
                         Text(
                             "Logout Disabled by System Administrator",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = Color.DarkGray,
                             fontWeight = FontWeight.Bold
                         )
@@ -2417,7 +2162,7 @@ fun ProfileSettingsTabScreen(
         Button(
             onClick = onEditClick,
             colors = ButtonDefaults.buttonColors(containerColor = FacebookBlue),
-            modifier = Modifier.fillMaxWidth().testTag("modify_channel_trigger"),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Modify Channel profile", fontWeight = FontWeight.Bold)
